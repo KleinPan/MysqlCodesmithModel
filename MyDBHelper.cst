@@ -45,6 +45,37 @@ namespace <%=Namespace%>
             }
         }
         #endregion
+         #region 执行存储过程 ExecuteNonQuery(),返回受影响的行数
+        /// <summary>
+        /// 执行存储过程 ExecuteNonQuery(),返回受影响的行数
+        /// </summary>
+        /// <param name="cmdText">执行的语句</param>
+        /// <param name="parameters">params传入的参数null</param>
+        /// <returns></returns> 
+		public static int ExecuteStoredProcedure(string procName,params MySqlParameter[] parameters)
+        {
+            MySqlConnection conn = new MySqlConnection(connstr);
+            int result=-1;
+            conn.Open();
+            using (MySqlCommand cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = procName;
+                cmd.CommandType = CommandType.StoredProcedure;
+                if(parameters!=null)
+                {
+                    cmd.Parameters.AddRange(parameters);
+                    result=cmd.ExecuteNonQuery();
+                    cmd.Parameters.Clear();
+                }
+                else
+                {
+                   cmd.Parameters.AddRange(parameters);
+                   result=cmd.ExecuteNonQuery(); 
+                }
+                return result;
+            }
+        }
+        #endregion
         
         #region 执行Command.ExecuteScalar(),返回首行首列
         /// <summary>
@@ -162,36 +193,6 @@ namespace <%=Namespace%>
         }
         #endregion
         
-        #region 执行存储过程 ExecuteNonQuery(),返回受影响的行数
-        /// <summary>
-        /// 执行存储过程 ExecuteNonQuery(),返回受影响的行数
-        /// </summary>
-        /// <param name="cmdText">执行的语句</param>
-        /// <param name="parameters">params传入的参数null</param>
-        /// <returns></returns> 
-		public static int ExecuteStoredProcedure(string procName,params MySqlParameter[] parameters)
-        {
-            MySqlConnection conn = new MySqlConnection(connstr);
-            int result=-1;
-            conn.Open();
-            using (MySqlCommand cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = procName;
-                cmd.CommandType = CommandType.StoredProcedure;
-                if(parameters!=null)
-                {
-                    cmd.Parameters.AddRange(parameters);
-                    result=cmd.ExecuteNonQuery();
-                    cmd.Parameters.Clear();
-                }
-                else
-                {
-                   cmd.Parameters.AddRange(parameters);
-                   result=cmd.ExecuteNonQuery(); 
-                }
-                return result;
-            }
-        }
-        #endregion
+       
     }
 }

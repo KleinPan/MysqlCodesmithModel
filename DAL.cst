@@ -1,7 +1,7 @@
 ﻿<%@ CodeTemplate Language="C#" TargetLanguage="C#" ResponseEncoding="UTF-8"	Src="ToolsCodeTemplate.cs" Inherits="ToolsCodeTemplate"%>
 <%@ Property Name="TargetTable" Type="SchemaExplorer.TableSchema" Category="Context" Description="TargetTable that the object is based on." %>
 <%@ Property Name="ModelsNamespace" Default="MyOffice.Models" Type="System.String" Category="Context" Description="TargetTable that the object is based on." %>
-<%@ Property Name="DALNamespace" Default="MyOffice.DAL" Type="System.String" Category="Context" Description="TargetTable that the object is based on." %>
+<%@ Property Name="DALNamespace" Default="PwbMVC.DAL" Type="System.String" Category="Context" Description="TargetTable that the object is based on." %>
 <%@ Property Name="DALClassNameSurfix" Default="Service" Type="System.String" Category="Context" Description="TargetTable that the object is based on." %>
 <%@ Assembly Name="SchemaExplorer" %>
 <%@ Assembly Name="System.Data" %>
@@ -20,16 +20,17 @@ namespace <%= DALNamespace %>
 {
 	public partial class <%= GetDALClassName() %>
 	{
-		<%-- public static Book AddBook(Book book) --%>
-        #region 根据传入Model，并返回Model
+		
+        #region 增加
         /// <summary>
-        /// 根据传入Model，并返回Model
+        /// 插入数据
         /// </summary>        
-        public bool Add (<%= GetModelClassName() %> <%= GetModelParamName() %>)
+        public bool Insert (<%= GetModelClassName() %> <%= GetModelParamName() %>)
 		{
 			<%if(IsIdentityPK())
 			{%>
 				string sql ="<%= GetAutoIncInsertSQLLine()%>";
+                
 				MySqlParameter[] para = new MySqlParameter[]
 					{
 						<%
@@ -44,8 +45,8 @@ namespace <%= DALNamespace %>
 						%>
 					};
 					
-				int AddId = (int)MyDBHelper.ExecuteScalar(sql, para);
-				if(AddId==1)
+				int affectRows = (int)MyDBHelper.ExecuteNonQuery(sql, para);
+				if(affectRows==1)
 				{
 					return true;
 				}else
@@ -77,33 +78,31 @@ namespace <%= DALNamespace %>
 				}			
 			<%}%>
 		}
+              
          #endregion
 
-		<%-- public static bool DeleteBookById(int id) --%>
+	
         #region  根据Id删除数据记录
         /// <summary>
         /// 根据Id删除数据记录
         /// </summary>
-        public int DeleteBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetPKParamName() %>)
+        public int DeleteBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
 		{
             string sql = "DELETE from <%= TargetTable.Name %> WHERE <%= GetPKPropertyName() %> = @<%= GetPKPropertyName() %>";
 
             MySqlParameter[] para = new MySqlParameter[]
 			{
-				new MySqlParameter("@<%= GetPKName() %>", <%= GetPKParamName() %>)
+				new MySqlParameter("@<%= GetPKName() %>", <%= GetCamelPKName() %>)
 			};
 		
             return MyDBHelper.ExecuteNonQuery(sql, para);
 		}
 		 #endregion
+					
 		
-				
-
-		
-		<%-- public static bool ModifyBook(Book book) --%>
-        #region 根据传入Model更新数据并返回更新后的Model
+        #region Update
         /// <summary>
-        /// 根据传入Model更新数据并返回更新后的Model
+        /// 根据传入Model的ID更新数据并返回更新后的Model
         /// </summary>
         public int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)
         {
@@ -141,16 +140,14 @@ namespace <%= DALNamespace %>
 			return MyDBHelper.ExecuteNonQuery(sql, para);
         }
         #endregion
-		
-		<%-- public static Book GetBookById(int id) --%>
-        #region 传入Id，获得Model实体
+		#region select
         /// <summary>
         /// 传入Id，获得Model实体
         /// </summary>
-        public <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetPKParamName() %>)
+        public <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
         {
             string sql = "SELECT * FROM <%= TargetTable.Name %> WHERE <%= GetPKPropertyName() %> = @<%= GetPKPropertyName() %>";
-            using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql, new MySqlParameter("@<%= GetPKPropertyName() %>", <%= GetPKParamName() %>)))
+            using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql, new MySqlParameter("@<%= GetPKPropertyName() %>", <%= GetCamelPKName() %>)))
 			{
 				if (reader.Read())
 				{
@@ -162,9 +159,23 @@ namespace <%= DALNamespace %>
 				}
        		}
         }
-		#endregion
+     
+        ///<summary>
+        ///根据字段名获取数据记录IEnumerable<>
+        ///</summary>              
+		public IEnumerable<<%= GetModelClassName() %>> GetBycolumnName(string columnName,string columnContent)
+		{
+			string sql = "SELECT * FROM <%= TargetTable.Name %> where "+columnName+"="+columnContent;
+			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql))
+			{
+				return ToModels(reader);			
+			}
+		}
+	
         
-        #region 把DataRow转换成Model
+        #endregion
+        
+     
         /// <summary>
         /// 把DataRow转换成Model
         /// </summary>
@@ -178,9 +189,9 @@ namespace <%= DALNamespace %>
 			<% } %>
 			return <%= GetModelParamName() %>;
 		}
-		#endregion
+	
         
-        #region  获得总记录数
+      
         ///<summary>
         /// 获得总记录数
         ///</summary>        
@@ -189,7 +200,7 @@ namespace <%= DALNamespace %>
 			string sql = "SELECT count(*) FROM <%= TargetTable.Name %>";
 			return (int)MyDBHelper.ExecuteScalar(sql);
 		}
-		#endregion
+
         
         #region 获得分页记录集IEnumerable<>
         ///<summary>
@@ -208,23 +219,7 @@ namespace <%= DALNamespace %>
 		#endregion
         
         
-        #region 根据字段名获取数据记录IEnumerable<>
-        ///<summary>
-        ///根据字段名获取数据记录IEnumerable<>
-        ///</summary>              
-		public IEnumerable<<%= GetModelClassName() %>> GetBycolumnName(string columnName,string columnContent)
-		{
-			string sql = "SELECT * FROM <%= TargetTable.Name %> where "+columnName+"="+columnContent;
-			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql))
-			{
-				return ToModels(reader);			
-			}
-		}
-		#endregion
-        
-        
-        
-        #region 获得总记录集IEnumerable<>
+
         ///<summary>
         /// 获得总记录集IEnumerable<>
         ///</summary> 
@@ -236,8 +231,9 @@ namespace <%= DALNamespace %>
 				return ToModels(reader);			
 			}
 		}
-        #endregion
-		
+  
+
+
         #region 把MySqlDataReader转换成IEnumerable<>
         ///<summary>
         /// 把MySqlDataReader转换成IEnumerable<>
@@ -289,123 +285,143 @@ namespace <%= DALNamespace %>
 	}
 }
 <script runat="template">
-public bool IsIdentityPK()
-{
-	foreach(ColumnSchema column in TargetTable.Columns)
-	{
-		if((bool)column.ExtendedProperties["CS_IsIdentity"].Value) 
-		{
-			return true;
-		}
-	}
-	return false;
-}
+
+//CS_IsUnsigned  表示此列 是否是 无符号的，其ExtendedProperties["IsUnsigned"].Value是bool类型，True表示是无符号的否则是有符号的或无法设置为无符号（为我自己添加的）。
+
+//CS_ColumnDefaultIsNull  某列的默认值是否是Null，True或False。
+
+//CS_Default  某列的默认值。
+
+//CS_Description  列的注释。
+
+//CS_IsIdentity  是否是标识列。
+
+//CS_IdentitySeed  是标识列的前提下该列的种子值（起始值）。
+
+//CS_IdentityIncrement  标识列的前提下该列的自增长值。
+
+//CS_ColumnDefault  和CS_Default一样，是某列的默认值
+
+//CS_SystemType 和 CS_ColumnType一样，都是某列在数据库中的 具体类型（通过SQL语句写出的类型）
+
+//CS_ColumnExtra  存储内容是什么暂时不知。
+
+//数据表的ExtendedProperties：
+
+//CS_ShowCreateTable  存储的是执行SQL语句：Show Create Table。。。后的第二部分内容
+
+//CS_Description  该表的注释
+                
+                
+    /// <summary>
+    /// 是否为列
+    /// </summary>
+    /// <returns></returns>
+    public bool IsIdentityPK() {
+        foreach (ColumnSchema column in TargetTable.Columns) {
+            if ((bool) column.ExtendedProperties["CS_IsIdentity"].Value) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 ///////////////////////////////////////////////////////////////
 // CLASS NAMES by Shen Bo
 ///////////////////////////////////////////////////////////////
 // UserService
-public string GetDALClassName()
-{
-	return 	GetModelClassName() + DALClassNameSurfix;
+public string GetDALClassName() {
+    return GetModelClassName() + DALClassNameSurfix;
 }
 // User
-public string GetModelClassName()
-{
-	return 	GetModelClassName(TargetTable);
+public string GetModelClassName() {
+    return GetModelClassName(TargetTable);
 }
 // user
-public string GetModelMemberVarName()
-{
-	return GetModelParamName();
+public string GetModelMemberVarName() {
+    return GetModelParamName();
 }
-// user
-public string GetModelParamName()
-{
-	return ConvertToCamel(GetModelClassName());
-}
-
-
-///////////////////////////////////////////////////////////////
-// INSERT SQL LINES by Shen Bo
-///////////////////////////////////////////////////////////////
-public string GetAutoIncInsertSQLLine()
-{
-	string result;
-	result = "INSERT INTO " + TargetTable.Name + " (";
-	foreach(ColumnSchema column in TargetTable.NonPrimaryKeyColumns)
-	{
-		result += column.Name + ", ";
-	}
-	result = result.Substring(0, result.Length-2);
-	result += ") ";
-	result += " VALUES (";
-	foreach(ColumnSchema column in TargetTable.NonPrimaryKeyColumns)
-	{
-		result += "@" + column.Name + ", ";
-	}
-	result = result.Substring(0, result.Length-2);
-	result += ")";
-	//result += ");select @@IDENTITY";
-	return result;
+/// <summary>
+/// 获取类名称的驼峰形式
+/// </summary>
+/// <returns></returns>
+public string GetModelParamName() {
+    return ConvertToCamel(GetModelClassName());
 }
 
-public string GetCommonInsertSQLLine()
-{
-	string result;
-	result = "INSERT INTO " + TargetTable.Name + " (";
-	foreach(ColumnSchema column in TargetTable.Columns)
-	{
-		result += column.Name + ", ";
-	}
-	result = result.Substring(0, result.Length-2);
-	result += ") ";
-	result += " VALUES (";
-	foreach(ColumnSchema column in TargetTable.Columns)
-	{
-		result += "@" + column.Name + ", ";
-	}
-	result = result.Substring(0, result.Length-2);
-	result += ")";
-	return result;
+
+/// <summary>
+/// 获取插入SQL语句,不包括主键
+/// </summary>
+/// <returns></returns>
+public string GetAutoIncInsertSQLLine() {
+    string result;
+    result = "INSERT INTO " + TargetTable.Name + " (";
+    foreach (ColumnSchema column in TargetTable.NonPrimaryKeyColumns) {
+        result += column.Name + ", ";
+    }
+    result = result.Substring(0, result.Length - 2);
+    result += ") ";
+    result += " VALUES (";
+    foreach (ColumnSchema column in TargetTable.NonPrimaryKeyColumns) {
+        result += "@" + column.Name + ", ";
+    }
+    result = result.Substring(0, result.Length - 2);
+    result += ")";
+    //result += ");select @@IDENTITY";
+    return result;
+}
+
+public string GetCommonInsertSQLLine() {
+    string result;
+    result = "INSERT INTO " + TargetTable.Name + " (";
+    foreach (ColumnSchema column in TargetTable.Columns) {
+        result += column.Name + ", ";
+    }
+    result = result.Substring(0, result.Length - 2);
+    result += ") ";
+    result += " VALUES (";
+    foreach (ColumnSchema column in TargetTable.Columns) {
+        result += "@" + column.Name + ", ";
+    }
+    result = result.Substring(0, result.Length - 2);
+    result += ")";
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////
 // PRIMARY KEY TYPE by Shen Bo
 ///////////////////////////////////////////////////////////////
 // int
-public string GetPKPropertyType()
-{
-	return 	GetPKType(TargetTable);
+public string GetPKPropertyType() {
+    return GetPKType(TargetTable);
 }
 
 ///////////////////////////////////////////////////////////////
 // PRIMARY KEY NAME by Shen Bo
 ///////////////////////////////////////////////////////////////
 // Id
-public string GetPKPropertyName()
-{
-	return ConvertToPascal(GetPKName());
+public string GetPKPropertyName() {
+    return ConvertToPascal(GetPKName());
 }
-// id
-public string GetPKParamName()
-{
-	return GetPKMemberVarName();	
-}
-// id
-public string GetPKMemberVarName()
-{
-	return ConvertToCamel(GetPKName());	
-}
-// Id
-public string GetPKName()
-{
-	return GetPKName(TargetTable);
+/// <summary>
+/// 获取主键驼峰名称
+/// </summary>
+/// <returns></returns>
+public string GetCamelPKName() {
+    return ConvertToCamel(GetPKName());
 }
 
-public override string GetFileName()
-{
-	return this.GetDALClassName() + ".cs";
+// Id
+public string GetPKName() {
+    return GetPKName(TargetTable);
+}
+/// <summary>
+/// 获取输出文件名称.cs
+/// </summary>
+/// <returns></returns>
+public override string GetFileName() {
+    return this.GetDALClassName() + ".cs";
 }
 
 </script>
