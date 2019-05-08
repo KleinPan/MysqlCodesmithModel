@@ -8,6 +8,8 @@
 <%@ Import Namespace="SchemaExplorer" %>
 <%@ Import Namespace="System.Data" %>
 <%@ Import Namespace="System.Text.RegularExpressions" %>
+
+
 <% PrintHeader(); %>
 using System;
 using System.Collections.Generic;
@@ -25,7 +27,7 @@ namespace <%= DALNamespace %>
         /// <summary>
         /// 插入数据
         /// </summary>        
-        public bool Insert (<%= GetModelClassName() %> <%= GetModelParamName() %>)
+        public  bool Insert (<%= GetModelClassName() %> <%= GetModelParamName() %>)
 		{
 			<%if(IsIdentityPK())
 			{%>
@@ -86,9 +88,9 @@ namespace <%= DALNamespace %>
         /// <summary>
         /// 根据Id删除数据记录
         /// </summary>
-        public int DeleteBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
+        public  int DeleteBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
 		{
-            string sql = "DELETE from <%= TargetTable.Name %> WHERE <%= GetPKPropertyName() %> = @<%= GetPKPropertyName() %>";
+            string sql = "DELETE from <%= TargetTable.Database %>.<%= TargetTable.Name %> WHERE <%= GetPKPropertyName() %> = @<%= GetPKPropertyName() %>";
 
             MySqlParameter[] para = new MySqlParameter[]
 			{
@@ -104,11 +106,9 @@ namespace <%= DALNamespace %>
         /// <summary>
         /// 根据传入Model的ID更新数据并返回更新后的Model
         /// </summary>
-        public int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)
+        public  int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)
         {
-            string sql =
-                "UPDATE <%= TargetTable.Name %> " +
-                "SET " +
+            string sql ="UPDATE <%= TargetTable.Database %>.<%= TargetTable.Name %> " +"SET " +
 			" <%= TargetTable.NonPrimaryKeyColumns[0].Name %> = @<%= TargetTable.NonPrimaryKeyColumns[0].Name %>" 
 			<%
 			for(int i=1; i<TargetTable.NonPrimaryKeyColumns.Count; i++)
@@ -142,11 +142,11 @@ namespace <%= DALNamespace %>
         #endregion
 		#region select
         /// <summary>
-        /// 传入Id，获得Model实体
+        /// 传入主键，获得Model实体
         /// </summary>
-        public <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
+        public  <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
         {
-            string sql = "SELECT * FROM <%= TargetTable.Name %> WHERE <%= GetPKPropertyName() %> = @<%= GetPKPropertyName() %>";
+            string sql = "SELECT * FROM <%= TargetTable.Database %>.<%= TargetTable.Name %> WHERE <%= GetPKPropertyName() %> = @<%= GetPKPropertyName() %>";
             using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql, new MySqlParameter("@<%= GetPKPropertyName() %>", <%= GetCamelPKName() %>)))
 			{
 				if (reader.Read())
@@ -163,9 +163,36 @@ namespace <%= DALNamespace %>
         ///<summary>
         ///根据字段名获取数据记录IEnumerable<>
         ///</summary>              
-		public IEnumerable<<%= GetModelClassName() %>> GetBycolumnName(string columnName,string columnContent)
+		public  IEnumerable<<%= GetModelClassName() %>> GetBycolumnName(string columnName,string columnContent)
 		{
-			string sql = "SELECT * FROM <%= TargetTable.Name %> where "+columnName+"="+columnContent;
+			string sql = "SELECT * FROM <%= TargetTable.Database %>.<%= TargetTable.Name %> where "+columnName+"='"+ @columnContent + "'";
+			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql,new MySqlParameter(columnName, columnContent)))
+			{
+				return ToModels(reader);			
+			}
+		}
+        
+        ///<summary>
+        ///根据字段名获取数据记录IEnumerable<>
+        ///</summary>              
+		public  IEnumerable<<%= GetModelClassName() %>> GetBycolumnNames(string[] columnNames,string[] columnContents)
+		{
+			string sql = "SELECT * FROM <%= TargetTable.Database %>.<%= TargetTable.Name %> where ";
+            
+            if (columnNames.Length!= columnContents.Length)
+            {
+                return null;
+            }
+            else
+            {
+                for (int i = 0; i < columnNames.Length; i++)
+                {
+                    sql += columnNames[i] +"= '"+ columnContents[i] + "' and ";
+                }
+                
+              sql =  sql.Substring(0, sql.Length - 5);
+            }
+            
 			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql))
 			{
 				return ToModels(reader);			
@@ -179,7 +206,7 @@ namespace <%= DALNamespace %>
         /// <summary>
         /// 把DataRow转换成Model
         /// </summary>
-		public <%= GetModelClassName() %> ToModel(MySqlDataReader dr)
+		public  <%= GetModelClassName() %> ToModel(MySqlDataReader dr)
 		{
 			<%= GetModelClassName() %> <%= GetModelParamName() %> = new <%= GetModelClassName() %>();
 
@@ -195,9 +222,9 @@ namespace <%= DALNamespace %>
         ///<summary>
         /// 获得总记录数
         ///</summary>        
-		public int GetTotalCount()
+		public  int GetTotalCount()
 		{
-			string sql = "SELECT count(*) FROM <%= TargetTable.Name %>";
+			string sql = "SELECT count(*) FROM <%= TargetTable.Database %>.<%= TargetTable.Name %>";
 			return (int)MyDBHelper.ExecuteScalar(sql);
 		}
 
@@ -208,7 +235,7 @@ namespace <%= DALNamespace %>
         ///</summary>              
 		public IEnumerable<<%= GetModelClassName() %>> GetPagedData(int minrownum,int maxrownum)
 		{
-			string sql = "SELECT * from(SELECT *,(row_number() over(order by <%=this.GetPKName()%>))-1 rownum FROM <%= TargetTable.Name %>) t where rownum>=@minrownum and rownum<=@maxrownum";
+			string sql = "SELECT * from(SELECT *,(row_number() over(order by <%=this.GetPKName()%>))-1 rownum FROM <%= TargetTable.Database %>.<%= TargetTable.Name %>) t where rownum>=@minrownum and rownum<=@maxrownum";
 			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql,
 				new MySqlParameter("@minrownum",minrownum),
 				new MySqlParameter("@maxrownum",maxrownum)))
@@ -223,9 +250,9 @@ namespace <%= DALNamespace %>
         ///<summary>
         /// 获得总记录集IEnumerable<>
         ///</summary> 
-		public IEnumerable<<%= GetModelClassName() %>> GetAll()
+		public  IEnumerable<<%= GetModelClassName() %>> GetAll()
 		{
-			string sql = "SELECT * FROM <%= TargetTable.Name %>";
+			string sql = "SELECT * FROM <%= TargetTable.Database %>.<%= TargetTable.Name %>";
 			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql))
 			{
 				return ToModels(reader);			
@@ -238,7 +265,7 @@ namespace <%= DALNamespace %>
         ///<summary>
         /// 把MySqlDataReader转换成IEnumerable<>
         ///</summary> 
-		protected IEnumerable<<%= GetModelClassName() %>> ToModels(MySqlDataReader reader)
+		protected  IEnumerable<<%= GetModelClassName() %>> ToModels(MySqlDataReader reader)
 		{
 			var list = new List<<%= GetModelClassName() %>>();
 			while(reader.Read())
@@ -253,7 +280,7 @@ namespace <%= DALNamespace %>
         ///<summary>
         /// 判断数据是否为空
         ///</summary>
-		protected object ToDBValue(object value)
+		protected  object ToDBValue(object value)
 		{
 			if(value==null)
 			{
@@ -270,7 +297,7 @@ namespace <%= DALNamespace %>
         ///<summary>
         /// 判断数据表中是否包含该字段
         ///</summary>
-		protected object ToModelValue(MySqlDataReader reader,string columnName)
+		protected  object ToModelValue(MySqlDataReader reader,string columnName)
 		{
 			if(reader.IsDBNull(reader.GetOrdinal(columnName)))
 			{
@@ -356,7 +383,7 @@ public string GetModelParamName() {
 /// <returns></returns>
 public string GetAutoIncInsertSQLLine() {
     string result;
-    result = "INSERT INTO " + TargetTable.Name + " (";
+    result = "INSERT INTO " +TargetTable.Database+"."+TargetTable.Name + " (";
     foreach (ColumnSchema column in TargetTable.NonPrimaryKeyColumns) {
         result += column.Name + ", ";
     }
@@ -374,7 +401,7 @@ public string GetAutoIncInsertSQLLine() {
 
 public string GetCommonInsertSQLLine() {
     string result;
-    result = "INSERT INTO " + TargetTable.Name + " (";
+    result = "INSERT INTO "+TargetTable.Database+"."+TargetTable.Name + " (";
     foreach (ColumnSchema column in TargetTable.Columns) {
         result += column.Name + ", ";
     }

@@ -13,6 +13,7 @@ namespace <%=Namespace%>
 {
     public class MyDBHelper
     {
+        //连接字符串需要写在App.config中.
         public static readonly string connstr = 
             ConfigurationManager.ConnectionStrings["<%=ConnectionStringName%>"].ConnectionString;
  
@@ -84,8 +85,7 @@ namespace <%=Namespace%>
         /// <param name="cmdText">执行的语句</param>
         /// <param name="parameters">params传入的参数null</param>
         /// <returns></returns>    
-        public static object ExecuteScalar(string cmdText,
-            params MySqlParameter[] parameters)
+        public static object ExecuteScalar(string cmdText, params MySqlParameter[] parameters)
         {
             using (MySqlConnection conn = new MySqlConnection(connstr))
             { 
@@ -158,21 +158,43 @@ namespace <%=Namespace%>
             MySqlConnection conn = new MySqlConnection(connstr);
             MySqlDataReader read=null;
             conn.Open();
-            using (MySqlCommand cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = cmdText;
-                if(parameters!=null)
-                { 
-                    cmd.Parameters.AddRange(parameters);
-                    read=cmd.ExecuteReader(CommandBehavior.CloseConnection);
-                    cmd.Parameters.Clear();
-                }
-                else
-                {
-                    read=cmd.ExecuteReader(CommandBehavior.CloseConnection);                    
-                }
-                return read;
+            MySqlCommand cmd = conn.CreateCommand();
+            
+            cmd.CommandText = cmdText;
+            if(parameters!=null)
+            { 
+                cmd.Parameters.AddRange(parameters);
+                read=cmd.ExecuteReader();
+                cmd.Parameters.Clear();
             }
+            else
+            {
+                read=cmd.ExecuteReader();                    
+            }
+            return read;
+            
+        }
+		#endregion
+         #region 执行ExecuteReader,返回MySqlDataReader
+        /// <summary>
+        /// 执行ExecuteReader,返回MySqlDataReader
+        /// </summary>
+        /// <param name="cmdText">执行的语句</param>
+        /// <param name="parameters">params传入的参数null</param>
+        /// <returns></returns>
+        public static MySqlDataReader ExecuteDataReader(string cmdText)
+        {
+            MySqlConnection conn = new MySqlConnection(connstr);
+            MySqlDataReader read=null;
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand();
+            
+            cmd.CommandText = cmdText; 
+                
+            read=cmd.ExecuteReader();
+                              
+            return read;
+            
         }
 		#endregion
         

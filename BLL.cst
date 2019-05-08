@@ -30,9 +30,9 @@ namespace <%= BLLNamespace %>
         /// 根据传入Model，并返回是否插入成功。
         /// </summary> 
 		[DataObjectMethod(DataObjectMethodType.Insert)]
-        public bool <%= GetModelClassName() %>Add(<%= GetModelClassName() %> <%= GetModelParamName() %>)
+        public static bool <%= GetModelClassName() %>Insert(<%= GetModelClassName() %> <%= GetModelParamName() %>)
         {
-            return new <%= GetDALClassName() %>().Add(<%= GetModelParamName() %>);
+            return new <%= GetDALClassName() %>().Insert(<%= GetModelParamName() %>);
         }
         #endregion
         
@@ -52,9 +52,19 @@ namespace <%= BLLNamespace %>
         /// <summary>
         /// 根据字段名获取数据记录
         /// </summary>
-	     public IEnumerable<<%= GetModelClassName() %>> GetBycolumnName(string columnName,string columnContent)
+	     public static IEnumerable<<%= GetModelClassName() %>> GetBycolumnName(string columnName,string columnContent)
 		{
 			return new <%= GetDALClassName() %>().GetBycolumnName(columnName,columnContent);
+		}
+        #endregion
+        
+        #region  根据字段名获取数据记录
+        /// <summary>
+        /// 根据字段名获取数据记录
+        /// </summary>
+	     public static IEnumerable<<%= GetModelClassName() %>> GetBycolumnNames(string[] columnNames,string[] columnContents)
+		{
+			return new <%= GetDALClassName() %>().GetBycolumnNames(columnNames,columnContents);
 		}
         #endregion
         
@@ -63,7 +73,7 @@ namespace <%= BLLNamespace %>
         /// 根据传入Model更新数据并返回更新后的Model
         /// </summary>
 		[DataObjectMethod(DataObjectMethodType.Update)]
-		public int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)
+		public static int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)
         {
             return new <%= GetDALClassName() %>().Update(<%= GetModelParamName() %>);
         }
@@ -74,7 +84,7 @@ namespace <%= BLLNamespace %>
         /// 传入Id，获得Model实体
         /// </summary>
 		[DataObjectMethod(DataObjectMethodType.Select)]
-        public <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetPKParamName() %>)
+        public static <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetPKParamName() %>)
         {
             return new <%= GetDALClassName() %>().GetBy<%= GetPKPropertyName() %>(<%= GetPKParamName() %>);
         }
@@ -95,7 +105,7 @@ namespace <%= BLLNamespace %>
         /// 获得分页记录集IEnumerable<>
         ///</summary>  
 		[DataObjectMethod(DataObjectMethodType.Select)]
-		public IEnumerable<<%= GetModelClassName() %>> GetPagedData(int minrownum,int maxrownum)
+		public static IEnumerable<<%= GetModelClassName() %>> GetPagedData(int minrownum,int maxrownum)
 		{
 			return new <%= GetDALClassName() %>().GetPagedData(minrownum,maxrownum);
 		}
@@ -106,7 +116,7 @@ namespace <%= BLLNamespace %>
         /// 获得总记录集IEnumerable<>
         ///</summary>  
 		[DataObjectMethod(DataObjectMethodType.Select)]
-		public IEnumerable<<%= GetModelClassName() %>> GetAll()
+		public static IEnumerable<<%= GetModelClassName() %>> GetAll()
 		{
 			return new <%= GetDALClassName() %>().GetAll();
 		}

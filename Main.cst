@@ -1,9 +1,10 @@
 ﻿<%@ CodeTemplate Language="C#" ResponseEncoding="UTF-8" TargetLanguage="Text" Src="" Inherits="" Debug="False" Description="Mysql三层架构模板" 
  Output="None"%>
  
+
 <%@ Property Name="SourceTables" Type="SchemaExplorer.TableSchemaCollection" Default="" Optional="False" Category=""%> 
 <%@ Register Name="CreatSingleTable" Template="CreatSingleTable.cst" MergeProperties="False" ExcludeProperties="" %> 
-<%@ Property Name="RootNamespace" Default="MysqlNamesapce" Type="System.String" Optional="False"%>
+<%@ Property Name="RootNamespace" Default="MySqlMVC" Type="System.String" Optional="False"%>
 <%@ Assembly Name="SchemaExplorer" %> 
 <%@ Assembly Name="System.Data" %>
 <%@ Import Namespace="SchemaExplorer" %> 
@@ -34,6 +35,7 @@
 foreach(TableSchema ts in SourceTables) 
 { 
     CreatSingleTable s = new CreatSingleTable(); 
+
    s.SourceTable = ts; 
    s.RootNamespace = RootNamespace;
    s.OutputDirectory = OutputDirectory;

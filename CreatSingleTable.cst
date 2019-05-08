@@ -41,7 +41,7 @@ MergeProperties="False" ExcludeProperties="" %>
     Models model = this.Create<Models>();
 	model.ModelsNamespace = this.RootNamespace+".Model";
 	model.TargetTable = this.SourceTable;
-	model.RenderToFile(this.OutputDirectory+"Model/"+model.GetFileName(),true);
+	model.RenderToFile(this.OutputDirectory+"DataModels/"+model.GetFileName(),true);
 	
 
     DAL dal = this.Create<DAL>();
