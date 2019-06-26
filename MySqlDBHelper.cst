@@ -178,6 +178,7 @@ namespace <%=Namespace%>
             
         }
 		#endregion
+        
          #region 执行ExecuteReader,返回MySqlDataReader
         /// <summary>
         /// 执行ExecuteReader,返回MySqlDataReader

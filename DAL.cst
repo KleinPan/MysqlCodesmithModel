@@ -23,7 +23,7 @@ namespace <%= DALNamespace %>
 	public partial class <%= GetDALClassName() %>
 	{
 		
-        #region 增加
+        #region Insert
         /// <summary>
         /// 插入数据
         /// </summary>        
@@ -84,9 +84,9 @@ namespace <%= DALNamespace %>
          #endregion
 
 	
-        #region  根据Id删除数据记录
+        #region  Delete
         /// <summary>
-        /// 根据Id删除数据记录
+        /// 根据主键删除数据
         /// </summary>
         public  int DeleteBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
 		{
@@ -104,7 +104,7 @@ namespace <%= DALNamespace %>
 		
         #region Update
         /// <summary>
-        /// 根据传入Model的对应数据库主键更新数据并返回受影响的行数
+        /// 根据主键更新数据
         /// </summary>
         public  int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)
         {
@@ -140,9 +140,10 @@ namespace <%= DALNamespace %>
 			return MySqlDBHelper.ExecuteNonQuery(sql, para);
         }
         #endregion
+        
 		#region select
         /// <summary>
-        /// 传入主键，获得Model实体
+        /// 根据主键查询数据
         /// </summary>
         public  <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
         {
