@@ -14,8 +14,8 @@ public class ToolsCodeTemplate : CodeTemplate
     {
         Response.WriteLine("//============================================================");
         Response.WriteLine("//创建时间:"+DateTime.Now);
-        Response.WriteLine("//创建人:PeterPanwb");
-        Response.WriteLine("//项目开源地址:https://github.com/PeterPanwb/MysqlCodesmithModel");
+        Response.WriteLine("//创建人:KleinPan");
+        Response.WriteLine("//项目开源地址:https://github.com/KleinPan/MysqlCodesmithModel");
         Response.WriteLine("//============================================================");
         Response.WriteLine();
     }

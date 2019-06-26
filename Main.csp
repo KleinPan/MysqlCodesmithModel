@@ -4,41 +4,41 @@
     <add key="ConnectionString1" value="server=127.0.0.1;User ID=root;Password=biolab-x-51818;database=biolab;port=53306;" />
   </variables>
   <propertySets>
-    <propertySet name="Main.txt" output="Main.txt" template="E:\潘文博\我的代码\Git\MysqlCodesmithModel\Main.cst">
+    <propertySet name="Main.txt" output="Main.txt" template="Main.cst">
       <property name="RootNamespace">MySqlNamesapce</property>
       <property name="SourceTables">
         <connectionString>$(ConnectionString1)</connectionString>
         <providerType>SchemaExplorer.MySQLSchemaProvider,SchemaExplorer.MySQLSchemaProvider</providerType>
         <tableList>
-      <table>
-        <owner />
-        <name>datyg</name>
-      </table>
-      <table>
-        <owner />
-        <name>dev</name>
-      </table>
-      <table>
-        <owner />
-        <name>fzmaintb</name>
-      </table>
-      <table>
-        <owner />
-        <name>fzresulttb</name>
-      </table>
-      <table>
-        <owner />
-        <name>shrecord</name>
-      </table>
-      <table>
-        <owner />
-        <name>shresult</name>
-      </table>
-      <table>
-        <owner />
-        <name>sta</name>
-      </table>
-    </tableList>
+          <table>
+            <owner />
+            <name>datyg</name>
+          </table>
+          <table>
+            <owner />
+            <name>dev</name>
+          </table>
+          <table>
+            <owner />
+            <name>fzmaintb</name>
+          </table>
+          <table>
+            <owner />
+            <name>fzresulttb</name>
+          </table>
+          <table>
+            <owner />
+            <name>shrecord</name>
+          </table>
+          <table>
+            <owner />
+            <name>shresult</name>
+          </table>
+          <table>
+            <owner />
+            <name>sta</name>
+          </table>
+        </tableList>
       </property>
       <property name="OutputDirectory">C:\Users\bran\Desktop\新建文件夹\</property>
     </propertySet>

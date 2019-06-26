@@ -2,7 +2,7 @@
 <%@ Property Name="TargetTable" Type="SchemaExplorer.TableSchema" Category="Context" Description="TargetTable that the object is based on." %>
 <%@ Property Name="ModelsNamespace" Default="MyOffice.Models" Type="System.String" Category="Context" Description="TargetTable that the object is based on." %>
 <%@ Property Name="DALNamespace" Default="PwbMVC.DAL" Type="System.String" Category="Context" Description="TargetTable that the object is based on." %>
-<%@ Property Name="DALClassNameSurfix" Default="Service" Type="System.String" Category="Context" Description="TargetTable that the object is based on." %>
+<%@ Property Name="DALClassNameSurfix" Default="Service" Type="System.String" Category="Context" Description="类名称后缀" %>
 <%@ Assembly Name="SchemaExplorer" %>
 <%@ Assembly Name="System.Data" %>
 <%@ Import Namespace="SchemaExplorer" %>
@@ -47,7 +47,7 @@ namespace <%= DALNamespace %>
 						%>
 					};
 					
-				int affectRows = (int)MyDBHelper.ExecuteNonQuery(sql, para);
+				int affectRows = (int)MySqlDBHelper.ExecuteNonQuery(sql, para);
 				if(affectRows==1)
 				{
 					return true;
@@ -70,7 +70,7 @@ namespace <%= DALNamespace %>
 						}
 						%>
 					};
-				int AddId = (int)MyDBHelper.ExecuteNonQuery(sql, para);
+				int AddId = (int)MySqlDBHelper.ExecuteNonQuery(sql, para);
 				if(AddId==1)
 				{
 					return true;
@@ -97,14 +97,14 @@ namespace <%= DALNamespace %>
 				new MySqlParameter("@<%= GetPKName() %>", <%= GetCamelPKName() %>)
 			};
 		
-            return MyDBHelper.ExecuteNonQuery(sql, para);
+            return MySqlDBHelper.ExecuteNonQuery(sql, para);
 		}
 		 #endregion
 					
 		
         #region Update
         /// <summary>
-        /// 根据传入Model的ID更新数据并返回更新后的Model
+        /// 根据传入Model的对应数据库主键更新数据并返回受影响的行数
         /// </summary>
         public  int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)
         {
@@ -137,7 +137,7 @@ namespace <%= DALNamespace %>
 				%>
 			};
 
-			return MyDBHelper.ExecuteNonQuery(sql, para);
+			return MySqlDBHelper.ExecuteNonQuery(sql, para);
         }
         #endregion
 		#region select
@@ -147,7 +147,7 @@ namespace <%= DALNamespace %>
         public  <%= GetModelClassName() %> GetBy<%= GetPKPropertyName() %>(<%= GetPKPropertyType() %> <%= GetCamelPKName() %>)
         {
             string sql = "SELECT * FROM <%= TargetTable.Database %>.<%= TargetTable.Name %> WHERE <%= GetPKPropertyName() %> = @<%= GetPKPropertyName() %>";
-            using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql, new MySqlParameter("@<%= GetPKPropertyName() %>", <%= GetCamelPKName() %>)))
+            using(MySqlDataReader reader = MySqlDBHelper.ExecuteDataReader(sql, new MySqlParameter("@<%= GetPKPropertyName() %>", <%= GetCamelPKName() %>)))
 			{
 				if (reader.Read())
 				{
@@ -166,7 +166,7 @@ namespace <%= DALNamespace %>
 		public  IEnumerable<<%= GetModelClassName() %>> GetBycolumnName(string columnName,string columnContent)
 		{
 			string sql = "SELECT * FROM <%= TargetTable.Database %>.<%= TargetTable.Name %> where "+columnName+"='"+ @columnContent + "'";
-			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql,new MySqlParameter(columnName, columnContent)))
+			using(MySqlDataReader reader = MySqlDBHelper.ExecuteDataReader(sql,new MySqlParameter(columnName, columnContent)))
 			{
 				return ToModels(reader);			
 			}
@@ -193,7 +193,7 @@ namespace <%= DALNamespace %>
               sql =  sql.Substring(0, sql.Length - 5);
             }
             
-			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql))
+			using(MySqlDataReader reader = MySqlDBHelper.ExecuteDataReader(sql))
 			{
 				return ToModels(reader);			
 			}
@@ -225,7 +225,7 @@ namespace <%= DALNamespace %>
 		public  int GetTotalCount()
 		{
 			string sql = "SELECT count(*) FROM <%= TargetTable.Database %>.<%= TargetTable.Name %>";
-			return (int)MyDBHelper.ExecuteScalar(sql);
+			return (int)MySqlDBHelper.ExecuteScalar(sql);
 		}
 
         
@@ -236,7 +236,7 @@ namespace <%= DALNamespace %>
 		public IEnumerable<<%= GetModelClassName() %>> GetPagedData(int minrownum,int maxrownum)
 		{
 			string sql = "SELECT * from(SELECT *,(row_number() over(order by <%=this.GetPKName()%>))-1 rownum FROM <%= TargetTable.Database %>.<%= TargetTable.Name %>) t where rownum>=@minrownum and rownum<=@maxrownum";
-			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql,
+			using(MySqlDataReader reader = MySqlDBHelper.ExecuteDataReader(sql,
 				new MySqlParameter("@minrownum",minrownum),
 				new MySqlParameter("@maxrownum",maxrownum)))
 			{
@@ -253,7 +253,7 @@ namespace <%= DALNamespace %>
 		public  IEnumerable<<%= GetModelClassName() %>> GetAll()
 		{
 			string sql = "SELECT * FROM <%= TargetTable.Database %>.<%= TargetTable.Name %>";
-			using(MySqlDataReader reader = MyDBHelper.ExecuteDataReader(sql))
+			using(MySqlDataReader reader = MySqlDBHelper.ExecuteDataReader(sql))
 			{
 				return ToModels(reader);			
 			}
@@ -353,10 +353,7 @@ namespace <%= DALNamespace %>
         return false;
     }
 
-///////////////////////////////////////////////////////////////
-// CLASS NAMES by Shen Bo
-///////////////////////////////////////////////////////////////
-// UserService
+
 public string GetDALClassName() {
     return GetModelClassName() + DALClassNameSurfix;
 }
@@ -416,18 +413,12 @@ public string GetCommonInsertSQLLine() {
     return result;
 }
 
-///////////////////////////////////////////////////////////////
-// PRIMARY KEY TYPE by Shen Bo
-///////////////////////////////////////////////////////////////
-// int
+
 public string GetPKPropertyType() {
     return GetPKType(TargetTable);
 }
 
-///////////////////////////////////////////////////////////////
-// PRIMARY KEY NAME by Shen Bo
-///////////////////////////////////////////////////////////////
-// Id
+
 public string GetPKPropertyName() {
     return ConvertToPascal(GetPKName());
 }

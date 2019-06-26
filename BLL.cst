@@ -70,7 +70,7 @@ namespace <%= BLLNamespace %>
         
         #region 根据传入Model更新数据并返回更新后的Model
         /// <summary>
-        /// 根据传入Model更新数据并返回更新后的Model
+        /// 根据传入Model的对应数据库主键更新数据并返回受影响的行数
         /// </summary>
 		[DataObjectMethod(DataObjectMethodType.Update)]
 		public static int Update(<%= GetModelClassName() %> <%= GetModelParamName() %>)

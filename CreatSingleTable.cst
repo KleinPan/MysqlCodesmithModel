@@ -7,7 +7,7 @@ MergeProperties="False" ExcludeProperties="" %>
 <%@ Register Name="BLL" Template="BLL.cst" 
 MergeProperties="False" ExcludeProperties="" %>
 
-<%@ Register Name="MyDBHelper" Template="MyDBHelper.cst" 
+<%@ Register Name="MySqlDBHelper" Template="MySqlDBHelper.cst" 
 MergeProperties="False" ExcludeProperties="" %>
 
 <%@ Property Name="SourceTable" Type="SchemaExplorer.TableSchema" Optional="False"%>
@@ -39,9 +39,9 @@ MergeProperties="False" ExcludeProperties="" %>
 </script>
 <%
     Models model = this.Create<Models>();
-	model.ModelsNamespace = this.RootNamespace+".Model";
+	model.ModelsNamespace = this.RootNamespace+".DBModel";
 	model.TargetTable = this.SourceTable;
-	model.RenderToFile(this.OutputDirectory+"DataModels/"+model.GetFileName(),true);
+	model.RenderToFile(this.OutputDirectory+"DBModels/"+model.GetFileName(),true);
 	
 
     DAL dal = this.Create<DAL>();
@@ -61,7 +61,7 @@ MergeProperties="False" ExcludeProperties="" %>
     bll.RenderToFile(this.OutputDirectory+"BLL/"+bll.GetFileName(),true);
 
         
-    MyDBHelper helper=this.Create<MyDBHelper>(  );
+    MySqlDBHelper helper=this.Create<MySqlDBHelper>();
     helper.Namespace = this.RootNamespace;
     helper.RenderToFile(this.OutputDirectory+helper.GetFileName(),true);
         

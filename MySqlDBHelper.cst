@@ -11,11 +11,14 @@ using System.Data;
 
 namespace <%=Namespace%>
 {
-    public class MyDBHelper
+    public class MySqlDBHelper
     {
         //连接字符串需要写在App.config中.
-        public static readonly string connstr = 
+        public static readonly string connstr2 = 
             ConfigurationManager.ConnectionStrings["<%=ConnectionStringName%>"].ConnectionString;
+            
+        public static readonly string connstr = 
+            "Server=127.0.0.1;Port=" + 3306 + ";SslMode=none;Uid=root;Pwd=root;CharSet=utf8;"
  
         #region 执行Command.ExecuteNonQuery(),返回受影响的行数
         /// <summary>
